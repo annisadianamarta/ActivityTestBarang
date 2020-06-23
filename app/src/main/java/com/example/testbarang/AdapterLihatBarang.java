@@ -2,23 +2,31 @@ package com.example.testbarang;
 
 
 
+import android.app.Activity;
+import android.app.Dialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 import android.content.Context;
 import java.util.ArrayList;
 import androidx.recyclerview.widget.RecyclerView;
 
+
 public class AdapterLihatBarang extends RecyclerView.Adapter<AdapterLihatBarang.ViewHolder> {
     private ArrayList<Barang> daftarBarang;
     private Context context;
+    FirebaseDataListener listener;
+
+
     public AdapterLihatBarang(ArrayList<Barang> barangs, Context ctx){
         /**
          * Inisiasi data dan variabel yang akan digunakan
          */
         daftarBarang = barangs;
         context = ctx;
+        listener = (FirebaseDataListener) ctx;
     }
     class ViewHolder extends RecyclerView.ViewHolder {
         /**
@@ -26,6 +34,9 @@ public class AdapterLihatBarang extends RecyclerView.Adapter<AdapterLihatBarang.
          * Disini kita hanya menggunakan data String untuk tiap item
          * dan juga view nya hanyalah satu TextView
          */
+
+        public boolean onLo
+
         TextView tvTitle;
         ViewHolder(View v) {
             super(v);
@@ -64,6 +75,36 @@ public class AdapterLihatBarang extends RecyclerView.Adapter<AdapterLihatBarang.
                 /**
                  * untuk latihan Selanjutnya ,fungsi Delete dan Update data
                  */
+                final Dialog dialog = new Dialog(context);
+                dialog.setContentView(R.layout.dialog_view);
+                dialog.setTitle("Pilih Aksi");
+                dialog.show();
+
+                Button editButton = (Button) dialog.findViewById(R.id.bt_edit_data);
+                Button delButton = (Button) dialog.findViewById(R.id.bt_delete_data);
+
+                //apabila tombol edit diklik
+                editButton.setOnClickListener(
+                        new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                dialog.dismiss();
+                                context.startActivity(TambahData.getActIntent((Activity) context).putExtra("data", daftarBarang.get(position)));
+                            }
+                        }
+                );
+                //apabila tombol delete diklik
+                delButton.setOnClickListener(
+                        new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                /**
+                                 *  Kodingan untuk Delete data (memanggil interface delete data)
+                                 */
+                                dialog.dismiss();
+                                listener.onDeleteData(daftarBarang.get(position), position);
+                            }
+                        }
                 return true;
             }
         });
@@ -76,4 +117,10 @@ public class AdapterLihatBarang extends RecyclerView.Adapter<AdapterLihatBarang.
          */
         return daftarBarang.size();
     }
+    public interface FirebaseDataListener{
+        void onDeleteData(Barang barang, int position);
+    }
 }
+
+
+
